@@ -1,0 +1,59 @@
+services:
+  certbot:
+    image: certbot/certbot:v5.8.0
+    volumes:
+      - ./volumes/letsencrypt:/etc/letsencrypt
+    ports:
+      - "80:80"
+    entrypoint: certbot certonly --non-interactive --agree-tos -m ${ADMIN_EMAIL} --standalone -d ${BASE_DOMAIN}
+
+  postgresql:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASS}
+      POSTGRES_DB: ${SQL_BASE}
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
+
+  hmdm:
+    build: .
+    image: freepoint360/hmdm:7.03.3-ubuntu24-tomcat11
+    depends_on:
+      - postgresql
+    ports:
+      - "443:8443"
+      - "31000:31000"
+    volumes:
+      - ./volumes/work:/usr/local/tomcat/work
+      - ./volumes/letsencrypt:/etc/letsencrypt
+      - ./volumes/hmdm-config:/usr/local/tomcat/conf/Catalina/localhost
+    environment:
+      SQL_HOST: postgresql
+      SQL_PORT: 5432
+      SQL_USER: ${SQL_USER}
+      SQL_BASE: ${SQL_BASE}
+      SQL_PASS: ${SQL_PASS}
+      BASE_DOMAIN: ${BASE_DOMAIN}
+      BASE_PORT: ${BASE_PORT}
+      BASE_PATH: ${BASE_PATH}
+      PROTOCOL: ${PROTOCOL}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      SHARED_SECRET: ${SHARED_SECRET}
+      HMDM_VARIANT: ${HMDM_VARIANT}
+      CLIENT_VARIANT: ${CLIENT_VARIANT}
+      DOWNLOAD_CREDENTIALS: ${DOWNLOAD_CREDENTIALS}
+      HMDM_URL: ${HMDM_URL}
+      CLIENT_VERSION: ${CLIENT_VERSION}
+      FORCE_RECONFIGURE: ${FORCE_RECONFIGURE}
+      HTTPS_LETSENCRYPT: ${HTTPS_LETSENCRYPT}
+      HTTPS_CERT: ${HTTPS_CERT}
+      HTTPS_FULLCHAIN: ${HTTPS_FULLCHAIN}
+      HTTPS_PRIVKEY: ${HTTPS_PRIVKEY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SSL: ${SMTP_SSL}
+      SMTP_STARTTLS: ${SMTP_STARTTLS}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM}

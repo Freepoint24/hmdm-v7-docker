@@ -1,0 +1,11 @@
+Hi ${firstName}!<br><br>
+Thank you for registering a trial account at ${baseUrl}!<br><br>
+To sign in, use your username '${customerName}' and the password specified while signing up.<br><br>
+To set up your mobile devices, please follow the manual: https://h-mdm.com/quick-start/#device<br><br>
+Here's a video manual how to setup a demo: https://youtu.be/2ChSuopSayw<br><br>
+Available device IDs for your demo account: ${deviceIds}.<br><br>
+If you have any troubles or questions, do not hesitate to write them to me, I would be happy to help you!<br><br>
+Looking forward to your response!<br><br>
+---<br>
+Best regards,<br>
+

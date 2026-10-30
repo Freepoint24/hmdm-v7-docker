@@ -1,0 +1,1 @@
+${appName} signup: please verify your email

@@ -1,0 +1,2 @@
+Thank you for creating your account on ${appName}!<br><br>
+To complete the signup, please verify your email by opening the link: <a href='${signupCompleteUrl}'>${signupCompleteUrl}</a>.

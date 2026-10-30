@@ -1,0 +1,2 @@
+Спасибо за регистрацию аккаунта на ${appName}!<br><br>
+Для завершения регистрации, подтвердите свой email переходом по ссылке: <a href='${signupCompleteUrl}'>${signupCompleteUrl}</a>.
