@@ -111,11 +111,23 @@ until PGPASSWORD="$SQL_PASS" psql -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -
 done
 
 APPLICATIONS_TABLE_EXISTS=$(PGPASSWORD="$SQL_PASS" psql -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$SQL_BASE" -tAc "SELECT to_regclass('public.applications') IS NOT NULL" | tr -d '[:space:]')
-if [ "$APPLICATIONS_TABLE_EXISTS" = "t" ]; then
-    APPLICATION_COUNT=$(PGPASSWORD="$SQL_PASS" psql -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$SQL_BASE" -tAc 'SELECT count(*) FROM applications' | tr -d '[:space:]')
-    if [ "$APPLICATION_COUNT" = "0" ]; then
-        PGPASSWORD="$SQL_PASS" psql -v ON_ERROR_STOP=1 -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$SQL_BASE" -f "$BASE_DIR/init.sql"
-    fi
+TOMCAT_PID=
+if [ "$APPLICATIONS_TABLE_EXISTS" != "t" ]; then
+    catalina.sh run &
+    TOMCAT_PID=$!
+    trap 'kill "$TOMCAT_PID" 2>/dev/null || true' INT TERM
+    until [ "$(PGPASSWORD="$SQL_PASS" psql -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$SQL_BASE" -tAc "SELECT to_regclass('public.applications') IS NOT NULL" | tr -d '[:space:]')" = "t" ]; do
+        if ! kill -0 "$TOMCAT_PID" 2>/dev/null; then
+            wait "$TOMCAT_PID"
+            exit 1
+        fi
+        sleep 2
+    done
+fi
+
+APPLICATION_COUNT=$(PGPASSWORD="$SQL_PASS" psql -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$SQL_BASE" -tAc 'SELECT count(*) FROM applications' | tr -d '[:space:]')
+if [ "$APPLICATION_COUNT" = "0" ]; then
+    PGPASSWORD="$SQL_PASS" psql -v ON_ERROR_STOP=1 -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$SQL_BASE" -f "$BASE_DIR/init.sql"
 fi
 
 APPLICATION_VERSIONS_TABLE_EXISTS=$(PGPASSWORD="$SQL_PASS" psql -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$SQL_BASE" -tAc "SELECT to_regclass('public.applicationversions') IS NOT NULL" | tr -d '[:space:]')
@@ -131,4 +143,8 @@ WHERE applicationid = (SELECT id FROM applications WHERE pkg = 'com.hmdm.launche
 SQL
 fi
 
-exec catalina.sh run
+if [ -n "$TOMCAT_PID" ]; then
+    wait "$TOMCAT_PID"
+else
+    exec catalina.sh run
+fi
