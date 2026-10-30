@@ -118,7 +118,7 @@ following commands. Install the Docker Compose plugin if it is not already
 available.
 
     apt install -y docker-compose-plugin
-    cd hmdm-docker-v7
+    cd hmdm-v7-docker
     cp .env.example .env
     vim .env              # Replace ADMIN_EMAIL, BASE_DOMAIN to your values
     docker compose up
