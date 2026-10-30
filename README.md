@@ -120,7 +120,7 @@ available.
     apt install -y docker-compose-plugin
     cd hmdm-docker-v7
     cp .env.example .env
-    vim .env              # Replace ADMIN_EMAIL, BASE_DOMAIN, SQL_PASS and SHARED_SECRET to your values
+    vim .env              # Replace ADMIN_EMAIL, BASE_DOMAIN to your values
     docker compose up
 
 The command `docker compose up` will start Headwind MDM in the interactive
